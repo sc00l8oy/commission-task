@@ -1,11 +1,19 @@
-# Bank Commission task skeleton
+# Commission task
 
-Following steps:
-- don't forget to change `Bank` namespace and package name in `composer.json`
- to your own, as `Bank` keyword should not be used anywhere in your task;
-- `\Bank\CommissionTask\Service\Math` is an example class provided for the skeleton and could or could not be used by your preference;
-- needed scripts could be found inside `composer.json`;
-- before submitting the task make sure that all the scripts pass (`composer run test` in particular);
-- this file should be updated before submitting the task with the documentation on how to run your program.
+### Structure
 
-Good luck! :) 
+- index.php - Main entry point
+- src - Business logic
+- src/Config - Rates and rules
+- src/Helpers - Helper methods included by composer
+- src/Models - Model files
+- src/Service - Services
+
+### How to run tests
+
+``composer run test``
+
+
+### How to run app
+
+``php index.php [path]`` - Path must be a valid readable CSV file path

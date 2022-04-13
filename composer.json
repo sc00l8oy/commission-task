@@ -1,16 +1,19 @@
 {
-    "name": "bank/commission-task",
+    "name": "app/commission-task",
     "description": "Recruitment task",
     "keywords": [],
     "type": "project",
     "autoload": {
         "psr-4": {
-            "Bank\\CommissionTask\\": "src"
-        }
+            "App\\CommissionTask\\": "src"
+        },
+        "files": [
+           "src/Helpers/math.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Bank\\CommissionTask\\Tests\\": "tests"
+            "App\\CommissionTask\\Tests\\": "tests"
         }
     },
     "require": {
