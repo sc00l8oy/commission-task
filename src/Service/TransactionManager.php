@@ -4,37 +4,43 @@ declare(strict_types=1);
 
 namespace App\CommissionTask\Service;
 
+use App\CommissionTask\Config\Config;
 use App\CommissionTask\Models\Transaction;
 use App\CommissionTask\Models\TransactionResult;
 
 class TransactionManager {
 
-  static $rules = null;
-  static $history = [];
-
-  public static function Sync() {
-    if (is_null(self::$rules)) {
-      self::$rules = require __DIR__ . '/../Config/rules.php';
-    }
+  public static function Transact(Transaction $transaction) : TransactionResult
+  {
+    $commission = self::CalculateCommission($transaction);
+    $fee = roundUp($transaction->amount*$commission/100, 2);
+    HistoryManager::Add($transaction);
+    return new TransactionResult($fee);
   }
 
-  public static function Transact(Transaction $transaction)
+  private static function CalculateCommission(Transaction $transaction) : float
   {
-    self::Sync();
-    if (self::$rules[$transaction->operation][$transaction->userType]['benefit'])
-      $comission = self::CalculateBenefitCommission($transaction);
-    else
-      $comission = self::$rules[$transaction->operation][$transaction->userType]['commission'];
-
-    $transactionResult = new TransactionResult();
-    $transactionResult->fee = round_up($transaction->amount*$comission/100, 2);
-    array_push(self::$history, $transaction);
-    return $transactionResult;
+    $rules = Config::Rules();
+    return $rules[$transaction->operation][$transaction->userType]['weeklyBenefit'] ? 
+            self::CalculateWeeklyBenefitCommission($transaction, $rules[$transaction->operation][$transaction->userType]) :
+            $rules[$transaction->operation][$transaction->userType]['commission'];
   }
 
-  private static function CalculateBenefitCommission($transaction)
+  private static function CalculateWeeklyBenefitCommission(Transaction $transaction, $rule) : float
   {
-    
+    $weeklyTransactions = HistoryManager::GetUserWeeklyTransactionsByDate($transaction->userId, $transaction->date, $transaction->operation);
+
+    if (count($weeklyTransactions) >= $rule['weeklyBenefit']['freeOperations'])
+      return $rule['commission'];
+
+    $weeklyTransactionSum = Rate::Convert($transaction->currency, $rule['weeklyBenefit']['currency'], $transaction->amount);
+    foreach ($weeklyTransactions as $weeklyTransaction)
+      $weeklyTransactionSum += Rate::Convert($weeklyTransaction->currency, $rule['weeklyBenefit']['currency'], $weeklyTransaction->amount);
+
+    if ($weeklyTransactionSum <= $rule['weeklyBenefit']['amount'])
+      return 0;
+
+    return ($weeklyTransactionSum - $rule['weeklyBenefit']['amount'])*$rule['commission']/$transaction->amount;
   }
 
 }

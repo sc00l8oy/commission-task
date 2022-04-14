@@ -11,4 +11,10 @@ class TransactionResult {
    */
   public $fee;
 
+
+  public function __construct(float $fee)
+  {
+    $this->fee = $fee;
+  }
+
 }

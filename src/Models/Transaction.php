@@ -23,7 +23,7 @@ class Transaction {
    */
   public $operation;
   /**
-   * @var string
+   * @var float
    */
   public $amount;
   /**
@@ -37,7 +37,7 @@ class Transaction {
     $this->userId = $userId;
     $this->userType = $userType;
     $this->operation = $operation;
-    $this->amount = $amount;
+    $this->amount = floatval($amount);
     $this->currency = $currency;
   }
 
